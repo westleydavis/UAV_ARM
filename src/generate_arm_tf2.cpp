@@ -6,6 +6,7 @@
  * Hardware includes an Arbotix-M Controller with AX-12 servos and a usb-webcam.
  *
  * written by: Jameson Lee
+ * Modified by: Westley Davis
  *
  */
 
@@ -14,10 +15,12 @@
 #include <tf/transform_listener.h>
 #include <keyboard/Key.h>
 #include <math.h>
-#include <jl/jointAngles.h>
+#include <uav_arm/jointAngles2.h>
 #include <std_msgs/Float64.h>
 #include <vector>
 #include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/Twist.h>
+#include <sensor_msgs/Joy.h>
 
 #define RATE_LOOP 0.007                     //timer callback loop rate
 #define BIT_MAX 4096                        //max resolution of servo
@@ -102,6 +105,7 @@ class Arm{
         ros::Subscriber keydown_sub;                //subscriber for keyboard downstroke
         ros::Subscriber keyup_sub;                  //subscriber for keyboard upstroke
         ros::Subscriber QR_sub;                     //Subscriber for /visp_auto_tracker/object_position
+				ros::Subscriber joy_sub_;                     //Subscriber for /joy
 
         ros::Publisher servo_pub;                   //Publishes servo output (0-1023)
         ros::Publisher ba_pub;                      //servo0 control topic (rad)
@@ -139,7 +143,7 @@ class Arm{
         tf::Quaternion qCAM;                        //Quaternion associated with UAV to Camera Frame Transform
 				tf::Quaternion qG;
 
-        ::jl::jointAngles rc;                       //custom message holding all servo outputs (0-1023)
+        ::uav_arm::jointAngles2 rc;                       //custom message holding all servo outputs (0-1023)
 
         std_msgs::Float64 th2;                      //variable servo0 control message
         std_msgs::Float64 th3;                      //variable servo1 control message
@@ -166,8 +170,8 @@ class Arm{
         int mode;
 
         //servo incremental
-        int ds0;
-        int ds1;
+        float ds0;
+        float ds1;
         int ds2;
         int ds3;
         int ds4;
@@ -177,6 +181,8 @@ class Arm{
 		void keyup_cb(const keyboard::KeyConstPtr& keyup);
         void QR_cb(const geometry_msgs::PoseStampedConstPtr& p);
 		void timer_cb(const ros::TimerEvent& event);
+		void joyCallback(const sensor_msgs::Joy::ConstPtr& joy);
+
 
         //function defines
         float servo2angle(int servo);
@@ -208,7 +214,8 @@ Arm::Arm(){
     j1_pub = nh.advertise<std_msgs::Float64>("/j1/command", 1);
     j2_pub = nh.advertise<std_msgs::Float64>("/j2/command", 1);
     j3_pub = nh.advertise<std_msgs::Float64>("/j3/command", 1);
-    servo_pub = nh.advertise<jl::jointAngles>("/servo_msg", 1);
+    servo_pub = nh.advertise<uav_arm::jointAngles2>("/servo_msg", 1);
+		joy_sub_ = nh.subscribe<sensor_msgs::Joy>("joy", 10, &Arm::joyCallback, this);
 
     QR_pose.pose.position.x = 0;
     QR_pose.pose.position.y = 0;
@@ -515,6 +522,63 @@ void Arm::keyup_cb(const keyboard::KeyConstPtr& keyup){
             break;
     }
 }
+
+// actions to take when input from joystick
+void Arm::joyCallback(const sensor_msgs::Joy::ConstPtr& joy){
+	ds0 = joy -> axes[0];
+	ds1 = joy -> axes[1];
+	/*
+	int x = keydown -> code;
+	switch(x){
+		case Q_KEY:
+            ds0 = 1;
+			break;
+		case A_KEY:
+            ds0 = -1;
+			break;
+		case W_KEY:
+            ds1 = 1;
+			break;
+		case S_KEY:
+            ds1 = -1;
+			break;
+		case E_KEY:
+            ds2 = 1;
+			break;
+		case D_KEY:
+            ds2 = -1;
+			break;
+		case R_KEY:
+            ds3 = 1;
+			break;
+		case F_KEY:
+            ds3 = -1;
+			break;
+		case T_KEY:
+            ds4 = 1;
+			break;
+		case G_KEY:
+            ds4 = -1;
+			break;
+		case Y_KEY:
+
+			break;
+		case H_KEY:
+
+			break;
+        case ONE_KEY:
+            mode = MANUAL;
+            break;
+        case TWO_KEY:
+            mode = AUTOMATIC;
+            break;
+        case THREE_KEY:
+            mode = CARTESIAN;
+            break;
+	}
+	*/
+}
+
 
 int main(int argc, char **argv){
 	ros::init(argc, argv, "Arm");
