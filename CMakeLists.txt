@@ -56,11 +56,12 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
+ add_message_files(
+   FILES
 #   Message1.msg
 #   Message2.msg
-# )
+  jointAngles2.msg
+ )
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -141,6 +142,8 @@ include_directories(
 
 ## Declare a C++ executable
 # add_executable(uav_arm_node src/uav_arm_node.cpp)
+add_executable(sync_cam_data2 src/sync_camera_data2.cpp)
+add_executable(generate_arm_tf2 src/generate_arm_tf2.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
@@ -150,6 +153,8 @@ include_directories(
 # target_link_libraries(uav_arm_node
 #   ${catkin_LIBRARIES}
 # )
+target_link_libraries(sync_cam_data2 ${catkin_LIBRARIES})
+target_link_libraries(generate_arm_tf2 ${catkin_LIBRARIES})
 
 #############
 ## Install ##
