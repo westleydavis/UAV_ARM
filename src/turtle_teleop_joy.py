@@ -2,8 +2,8 @@
 import rospy
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import Joy
-#from sensor_msgs.msg import keyboard
-from keyboard import Key
+from keyboard.msg import Key
+#from keyboard import Key.msg
 
 mode = 0
 # Author: Andrew Dai
@@ -16,9 +16,9 @@ mode = 0
 # axis 0 aka left stick horizonal controls angular speed
 def callback(data):
     twist = Twist()
-    if mode = 0:
+    if mode == 0:
         modeinv=1
-    else
+    else:
         modeinv=0
     # vertical left stick axis = linear rate
     twist.linear.x = 4*data.axes[mode]
@@ -27,11 +27,13 @@ def callback(data):
     pub.publish(twist)
 
 def callback2(data):
+    # key = Key()
     global mode
+
     myinput = data.code
-    if myinput == key_q:
+    if myinput == Key.KEY_F1:
         mode = 1
-    elif myinput == key_w:
+    elif myinput == Key.KEY_F2:
         mode = 0
 
 # Intializes everything
