@@ -197,6 +197,8 @@ Arm::Arm(){
     rc.servo3 = SERVO3_0;
     rc.servo4 = SERVO4_0;
     rc.servo5 = SERVO5_0;
+
+	movehome();
     ds0 = 0;
     ds1 = 0;
     ds2 = 0;
@@ -232,6 +234,11 @@ Arm::Arm(){
     G_pose.pose.position.y = y_goal;
     G_pose.pose.position.z = z_goal;
     mode = MANUAL;
+}
+
+void Arm::movehome(){
+
+	
 }
 
 float Arm::servo2angle(int servo){
