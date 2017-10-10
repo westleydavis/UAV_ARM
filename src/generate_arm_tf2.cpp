@@ -182,6 +182,7 @@ class Arm{
         void QR_cb(const geometry_msgs::PoseStampedConstPtr& p);
 		void timer_cb(const ros::TimerEvent& event);
 		void joyCallback(const sensor_msgs::Joy::ConstPtr& joy);
+		void movehome();
 
 
         //function defines
@@ -238,7 +239,7 @@ Arm::Arm(){
 
 void Arm::movehome(){
 
-	
+
 }
 
 float Arm::servo2angle(int servo){

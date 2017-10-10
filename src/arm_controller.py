@@ -4,7 +4,9 @@ import rospy
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import Joy
 from keyboard.msg import Key
-from uav_arm.msg import jointAngles2
+from uav_arm.msg import jointAngles
+
+mymsg = jointAngles()
 # from keyboard import Key.msg
 
 mode = 0
