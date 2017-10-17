@@ -5,20 +5,30 @@ from geometry_msgs.msg import Twist
 from sensor_msgs.msg import Joy
 from keyboard.msg import Key
 from uav_arm.msg import jointAngles
+from import string
 
 mymsg = jointAngles()
-# from keyboard import Key.msg
+
 
 mode = 0
-# Author: Andrew Dai
-# This ROS Node converts Joystick inputs from the joy node
-# into commands for turtlesim
 
 
-# Receives joystick messages (subscribed to Joy topic)
-# then converts the joysick inputs into Twist commands
-# axis 1 aka left stick vertical controls linear speed
-# axis 0 aka left stick horizonal controls angular speed
+class Servo:
+
+    def __init__(self, name):
+        self.name = name
+        pub = rospy.Publisher('turtle1/cmd_vel', Twist)
+
+    def move(self, position):
+        self.position = position
+
+
+Servo servo1
+Servo servo2
+Servo servo3
+Servo servo4
+Servo servo5
+
 
 def callback(data):
     twist = Twist()
