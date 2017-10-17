@@ -5,7 +5,7 @@ from geometry_msgs.msg import Twist
 from sensor_msgs.msg import Joy
 from keyboard.msg import Key
 from uav_arm.msg import jointAngles
-from import string
+from std_msgs.msg import string
 
 mymsg = jointAngles()
 
@@ -23,7 +23,7 @@ class Servo:
         self.position = position
 
 
-Servo servo1
+servo1 = Servo()
 Servo servo2
 Servo servo3
 Servo servo4
