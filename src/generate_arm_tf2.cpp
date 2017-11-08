@@ -533,8 +533,9 @@ void Arm::keyup_cb(const keyboard::KeyConstPtr& keyup){
 
 // actions to take when input from joystick
 void Arm::joyCallback(const sensor_msgs::Joy::ConstPtr& joy){
-	ds0 = joy -> axes[0];
-	ds1 = joy -> axes[1];
+	ds0 = joy -> axes[1];
+	ds1 = joy -> axes[0];
+	ds2 = joy -> axes[4];
 	/*
 	int x = keydown -> code;
 	switch(x){

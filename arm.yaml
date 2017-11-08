@@ -10,8 +10,17 @@ joints: {
     j2: {id: 3, max_angle: 80, min_angle: -80, ticks: 4096, max_speed: 250},
     j3: {id: 4, max_angle: 8, min_angle: -8, ticks: 4096, max_speed: 250, invert: False},
     j4: {id: 5, max_angle: 8, min_angle: -8, ticks: 4096, max_speed: 250},
+    s0: {id: 0, type: hobby_servo},
+    s1: {id: 1, type: hobby_servo},
+    s2: {id: 2, type: hobby_servo},
+    s12: {id: 12, type: hobby_servo, max_speed: 2500},
+    s13: {id: 13, type: hobby_servo, max_speed: 2500},
+    j9: {id: 7, max_angle: 8, min_angle: -8, ticks: 4096, max_speed: 2500, type: dynamixel},
+
+
 
 }
+
 controllers: {
-  arm_controller: {type: follow_controller, joints: [base_joint, j1, j2, j3, j4], action_name: arm_controller/follow_joint_trajectory }
+  arm_controller: {type: follow_controller, joints: [base_joint, j1, j2, j3], action_name: arm_controller/follow_joint_trajectory }
 }

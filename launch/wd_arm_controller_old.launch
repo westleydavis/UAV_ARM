@@ -1,10 +1,12 @@
 <launch>
+
 	<node
 		pkg = "uav_arm"
 		type = "generate_arm_tf2"
 		name = "generate_arm_tf2"
 		output = "screen"
 	/>
+
 	<node
 		pkg = "keyboard"
 		type = "keyboard"
@@ -15,12 +17,15 @@
 		type = "rviz"
 		name = "rviz"
 	/>
+
+<!--
 	<node
 		name="arbotix"
 		pkg="arbotix_python"
 		type="arbotix_driver" output="screen">
     		<rosparam file="$(find uav_arm)/arm.yaml" command="load" />
   	</node>
+	-->
 
 		<!-- joy node -->
 		<node respawn="true" pkg="joy"
