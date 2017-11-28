@@ -18,14 +18,14 @@
 		name = "rviz"
 	/>
 
-<!--
+
 	<node
 		name="arbotix"
 		pkg="arbotix_python"
 		type="arbotix_driver" output="screen">
     		<rosparam file="$(find uav_arm)/arm.yaml" command="load" />
   	</node>
-	-->
+
 
 		<!-- joy node -->
 		<node respawn="true" pkg="joy"

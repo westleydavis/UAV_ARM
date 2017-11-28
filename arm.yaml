@@ -5,7 +5,7 @@ read_rate: 250
 write_rate: 250
 
 joints: {
-    base_joint: {id: 1, max_angle: 40, min_angle: -40, ticks: 4096, max_speed: 250},
+    base_joint: {id: 1, max_angle: 40, min_angle: -40, ticks: 4096, max_speed: 2500, type: dynamixel},
     j1: {id: 2, max_angle: 80, min_angle: -80, ticks: 4096, max_speed: 250, invert: True},
     j2: {id: 3, max_angle: 80, min_angle: -80, ticks: 4096, max_speed: 250},
     j3: {id: 4, max_angle: 8, min_angle: -8, ticks: 4096, max_speed: 250, invert: False},
@@ -15,7 +15,7 @@ joints: {
     s2: {id: 2, type: hobby_servo},
     s12: {id: 12, type: hobby_servo, max_speed: 2500},
     s13: {id: 13, type: hobby_servo, max_speed: 2500},
-    j9: {id: 7, max_angle: 8, min_angle: -8, ticks: 4096, max_speed: 2500, type: dynamixel},
+    j9: {id: 17, max_angle: 8, min_angle: -8, ticks: 4096, max_speed: 2500, type: dynamixel},
 
 
 
