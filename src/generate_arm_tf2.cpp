@@ -46,13 +46,13 @@
 // Devavit-Hartenberg parameters //
 // ///////////////////////////// //
 
-//UAV Frame to Manipulator Static Base
+//UAV Frame to Manipulator Static Shoulder_ML
 #define alpha0 M_PI
 #define a0 0
 #define theta1 0
 #define d1 0
 
-//Static Base to joint 1 servo (servo0)
+//Static Shoulder_ML to joint 1 servo (servo0)
 #define alpha1 0
 #define a1 0
 #define d2 0
@@ -70,7 +70,7 @@
 #define alpha4 0
 #define d5 0
 
-//Link 3 to wrist (servo4)
+//Link 3 to Wrist_Pronate (servo4)
 #define theta6 0
 #define d6 0
 
@@ -108,10 +108,10 @@ class Arm{
 				ros::Subscriber joy_sub_;                     //Subscriber for /joy
 
         ros::Publisher servo_pub;                   //Publishes servo output (0-1023)
-        ros::Publisher ba_pub;                      //servo0 control topic (rad)
-        ros::Publisher j1_pub;                      //servo1 control topic (rad)
-        ros::Publisher j2_pub;                      //servo2 control topic (rad)
-        ros::Publisher j3_pub;                      //servo3 control topic (rad)
+        ros::Publisher shoulder_ml_pub;                      //servo0 control topic (rad)
+        ros::Publisher shoulder_ap_pub;                      //servo1 control topic (rad)
+        ros::Publisher elbow_pub;                      //servo2 control topic (rad)
+        ros::Publisher wrist_flex_pub;                      //servo3 control topic (rad)
 
         ros::Timer timer;                           //ROS timer object
 
@@ -119,26 +119,26 @@ class Arm{
         tf::TransformListener Li;                   //tf Listener object
 
         tf::Transform TU;                           //Universal Frame Transform
-        tf::Transform T01;                          //UAV to Static Base Frame Transform
-        tf::Transform T12;                          //Static Base to Joint 1 servo Frame Transform
+        tf::Transform T01;                          //UAV to Static Shoulder_ML Frame Transform
+        tf::Transform T12;                          //Static Shoulder_ML to Joint 1 servo Frame Transform
         tf::Transform T23;                          //joint 1 servo to link 1 Frame Transform
         tf::Transform T34;                          //link 1 to link 2 Frame Transform
         tf::Transform T45;                          //link 2 to link 3 Frame Transform
-        tf::Transform T56;                          //link 3 to wrist Frame Transform
+        tf::Transform T56;                          //link 3 to Wrist_Pronate Frame Transform
 				tf::Transform TG;
 
         tf::Transform TQR;                          //QR code to Camera Frame Transform
         tf::Transform TCAM;                         //UAV to Camera Frame Transform
 
-        tf::StampedTransform T_goal;                //Base to QR Frame Transform
+        tf::StampedTransform T_goal;                //Shoulder_ML to QR Frame Transform
 
         tf::Quaternion qU;                          //Quaternion associated with Universal Frame Transform
-        tf::Quaternion q01;                         //Quaternion associated with UAV to Static Base Frame Transform
-        tf::Quaternion q12;                         //Quaternion associated with Static Base to Joint 1 servo Frame Transform
+        tf::Quaternion q01;                         //Quaternion associated with UAV to Static Shoulder_ML Frame Transform
+        tf::Quaternion q12;                         //Quaternion associated with Static Shoulder_ML to Joint 1 servo Frame Transform
         tf::Quaternion q23;                         //Quaternion associated with joint 1 servo to link 1 Frame Transform
         tf::Quaternion q34;                         //Quaternion associated with link 1 to link 2 Frame Transform
         tf::Quaternion q45;                         //Quaternion associated with link 2 to link 3 Frame Transform
-        tf::Quaternion q56;                         //Quaternion associated with link 3 to wrist Frame Transform
+        tf::Quaternion q56;                         //Quaternion associated with link 3 to Wrist_Pronate Frame Transform
 
         tf::Quaternion qCAM;                        //Quaternion associated with UAV to Camera Frame Transform
 				tf::Quaternion qG;
@@ -213,10 +213,10 @@ Arm::Arm(){
 	keyup_sub = nh.subscribe<keyboard::Key>("/keyboard/keyup", 1, &Arm::keyup_cb, this);
 	keydown_sub = nh.subscribe<keyboard::Key>("/keyboard/keydown", 1, &Arm::keydown_cb, this);
     QR_sub = nh.subscribe<geometry_msgs::PoseStamped>("/visp_auto_tracker/object_position", 1, &Arm::QR_cb, this);
-    ba_pub = nh.advertise<std_msgs::Float64>("/base_joint/command", 1);
-    j1_pub = nh.advertise<std_msgs::Float64>("/j1/command", 1);
-    j2_pub = nh.advertise<std_msgs::Float64>("/j2/command", 1);
-    j3_pub = nh.advertise<std_msgs::Float64>("/j3/command", 1);
+    shoulder_ml_pub = nh.advertise<std_msgs::Float64>("/shoulder_ml/command", 1);
+    shoulder_ap_pub = nh.advertise<std_msgs::Float64>("/shoulder_ap/command", 1);
+    elbow_pub = nh.advertise<std_msgs::Float64>("/elbow/command", 1);
+    wrist_flex_pub = nh.advertise<std_msgs::Float64>("/wrist_flex/command", 1);
     servo_pub = nh.advertise<uav_arm::jointAngles2>("/servo_msg", 1);
 		joy_sub_ = nh.subscribe<sensor_msgs::Joy>("joy", 10, &Arm::joyCallback, this);
 
@@ -417,21 +417,21 @@ void Arm::timer_cb(const ros::TimerEvent& event){
 
   br.sendTransform(tf::StampedTransform(TU,rc.m_time,"UNIVERSAL","UAV"));
 	br.sendTransform(tf::StampedTransform(TG,rc.m_time,"UAV","GOAL"));
-	br.sendTransform(tf::StampedTransform(T01,rc.m_time,"UAV","Base"));
-	br.sendTransform(tf::StampedTransform(T12,rc.m_time,"Base","joint1"));
-	br.sendTransform(tf::StampedTransform(T23,rc.m_time,"joint1","joint2"));
-	br.sendTransform(tf::StampedTransform(T34,rc.m_time,"joint2","joint3"));
-	br.sendTransform(tf::StampedTransform(T45,rc.m_time,"joint3","wrist"));
-	br.sendTransform(tf::StampedTransform(T56,rc.m_time,"wrist","gripper"));
+	br.sendTransform(tf::StampedTransform(T01,rc.m_time,"UAV","Shoulder_ML"));
+	br.sendTransform(tf::StampedTransform(T12,rc.m_time,"Shoulder_ML","Shoulder_AP"));
+	br.sendTransform(tf::StampedTransform(T23,rc.m_time,"Shoulder_AP","Elbow"));
+	br.sendTransform(tf::StampedTransform(T34,rc.m_time,"Elbow","Wrist_Flex"));
+	br.sendTransform(tf::StampedTransform(T45,rc.m_time,"Wrist_Flex","Wrist_Pronate"));
+	br.sendTransform(tf::StampedTransform(T56,rc.m_time,"Wrist_Pronate","Gripper"));
 
     br.sendTransform(tf::StampedTransform(TCAM,rc.m_time,"UAV","CAM"));
     br.sendTransform(tf::StampedTransform(TQR,rc.m_time,"CAM","QR"));
 
     servo_pub.publish(rc);
-    ba_pub.publish(th2);
-    j1_pub.publish(th3);
-    j2_pub.publish(th4);
-    j3_pub.publish(th5);
+    shoulder_ml_pub.publish(th2);
+    shoulder_ap_pub.publish(th3);
+    elbow_pub.publish(th4);
+    wrist_flex_pub.publish(th5);
 }
 
 void Arm::QR_cb(const geometry_msgs::PoseStampedConstPtr& p){

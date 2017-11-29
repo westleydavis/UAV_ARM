@@ -1,26 +1,18 @@
 port: /dev/ttyUSB0
 
-rate: 250
-read_rate: 250
-write_rate: 250
+rate: 2500
+read_rate: 2500
+write_rate: 2500
 
 joints: {
-    base_joint: {id: 1, max_angle: 40, min_angle: -40, ticks: 4096, max_speed: 2500, type: dynamixel},
-    j1: {id: 2, max_angle: 80, min_angle: -80, ticks: 4096, max_speed: 250, invert: True},
-    j2: {id: 3, max_angle: 80, min_angle: -80, ticks: 4096, max_speed: 250},
-    j3: {id: 4, max_angle: 8, min_angle: -8, ticks: 4096, max_speed: 250, invert: False},
-    j4: {id: 5, max_angle: 8, min_angle: -8, ticks: 4096, max_speed: 250},
-    s0: {id: 0, type: hobby_servo},
-    s1: {id: 1, type: hobby_servo},
-    s2: {id: 2, type: hobby_servo},
-    s12: {id: 12, type: hobby_servo, max_speed: 2500},
-    s13: {id: 13, type: hobby_servo, max_speed: 2500},
-    j9: {id: 17, max_angle: 8, min_angle: -8, ticks: 4096, max_speed: 2500, type: dynamixel},
-
-
-
+    shoulder_ml: {id: 1, max_angle: 40, min_angle: -40, ticks: 4096, max_speed: 2500, type: dynamixel},
+    shoulder_ap: {id: 2, max_angle: 80, min_angle: -80, ticks: 4096, max_speed: 250, invert: True},
+    elbow: {id: 3, max_angle: 80, min_angle: -80, ticks: 4096, max_speed: 250},
+    wrist_flex: {id: 4, max_angle: 8, min_angle: -8, ticks: 4096, max_speed: 250, invert: False},
+    wrist_pronate: {id: 5, max_angle: 8, min_angle: -8, ticks: 4096, max_speed: 250},
+    gripper: {id: 0, type: hobby_servo},
 }
 
 controllers: {
-  arm_controller: {type: follow_controller, joints: [base_joint, j1, j2, j3], action_name: arm_controller/follow_joint_trajectory }
+  arm_controller: {type: follow_controller, joints: [shoulder_ml, shoulder_ap, elbow, wrist_flex], action_name: arm_controller/follow_joint_trajectory }
 }
