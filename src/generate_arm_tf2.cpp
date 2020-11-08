@@ -22,7 +22,7 @@
 #include <geometry_msgs/Twist.h>
 #include <sensor_msgs/Joy.h>
 
-#define RATE_LOOP 0.007                     //timer callback loop rate
+#define RATE_LOOP 0.0035                     //timer callback loop rate
 #define BIT_MAX 4096                        //max resolution of servo
 
 #define L1 0.2f                        //Length of Manipulator Link 1
@@ -39,7 +39,7 @@
 #define AUTOMATIC 2
 #define CARTESIAN 3
 #define SPEED_SCALE 3
-#define CARTESIAN_SPEED_SCALE 0.001
+#define CARTESIAN_SPEED_SCALE 0.0005
 #define ARM_CAMERA_OFFSET 0.1f              //Offset for autonomous calculation (intersect final link with target and this offset)
 
 // ///////////////////////////// //
@@ -105,13 +105,16 @@ class Arm{
         ros::Subscriber keydown_sub;                //subscriber for keyboard downstroke
         ros::Subscriber keyup_sub;                  //subscriber for keyboard upstroke
         ros::Subscriber QR_sub;                     //Subscriber for /visp_auto_tracker/object_position
-				ros::Subscriber joy_sub_;                     //Subscriber for /joy
+				ros::Subscriber joy_sub;                     //Subscriber for /joy
 
         ros::Publisher servo_pub;                   //Publishes servo output (0-1023)
         ros::Publisher shoulder_ml_pub;                      //servo0 control topic (rad)
         ros::Publisher shoulder_ap_pub;                      //servo1 control topic (rad)
         ros::Publisher elbow_pub;                      //servo2 control topic (rad)
         ros::Publisher wrist_flex_pub;                      //servo3 control topic (rad)
+				ros::Publisher gripper_pub;
+				ros::Publisher ltrigger_pub;
+				ros::Publisher rtrigger_pub;
 
         ros::Timer timer;                           //ROS timer object
 
@@ -150,6 +153,9 @@ class Arm{
         std_msgs::Float64 th4;                      //variable servo2 control message
         std_msgs::Float64 th5;                      //variable servo3 control message
         std_msgs::Float64 al5;                      //variable servo4 control message
+				std_msgs::Float64 ltrigmsg;
+				std_msgs::Float64 rtrigmsg;
+				std_msgs::Float64 grippermsg;
 
         geometry_msgs::PoseStamped QR_pose;         //message from visp_auto_tracker package
 				geometry_msgs::PoseStamped G_pose;
@@ -166,6 +172,9 @@ class Arm{
         float x_goal;
         float y_goal;
         float z_goal;
+				int ltrigger;
+				int rtrigger;
+				float gripper;
 
         int mode;
 
@@ -198,6 +207,7 @@ Arm::Arm(){
     rc.servo3 = SERVO3_0;
     rc.servo4 = SERVO4_0;
     rc.servo5 = SERVO5_0;
+		rc.gripper = 0;
 
 	movehome();
     ds0 = 0;
@@ -205,6 +215,9 @@ Arm::Arm(){
     ds2 = 0;
     ds3 = 0;
     ds4 = 0;
+		ltrigger = 1;
+		rtrigger = 1;
+		gripper = 0;
 
 	a3 = L1;
 	a4 = L2;
@@ -213,12 +226,15 @@ Arm::Arm(){
 	keyup_sub = nh.subscribe<keyboard::Key>("/keyboard/keyup", 1, &Arm::keyup_cb, this);
 	keydown_sub = nh.subscribe<keyboard::Key>("/keyboard/keydown", 1, &Arm::keydown_cb, this);
     QR_sub = nh.subscribe<geometry_msgs::PoseStamped>("/visp_auto_tracker/object_position", 1, &Arm::QR_cb, this);
-    shoulder_ml_pub = nh.advertise<std_msgs::Float64>("/shoulder_ml/command", 1);
-    shoulder_ap_pub = nh.advertise<std_msgs::Float64>("/shoulder_ap/command", 1);
-    elbow_pub = nh.advertise<std_msgs::Float64>("/elbow/command", 1);
-    wrist_flex_pub = nh.advertise<std_msgs::Float64>("/wrist_flex/command", 1);
+    shoulder_ml_pub = nh.advertise<std_msgs::Float64>("/arm_shoulder_ml/command", 1);
+    shoulder_ap_pub = nh.advertise<std_msgs::Float64>("/arm_shoulder_ap/command", 1);
+    elbow_pub = nh.advertise<std_msgs::Float64>("/arm_elbow/command", 1);
+    wrist_flex_pub = nh.advertise<std_msgs::Float64>("/arm_wrist_flex/command", 1);
+		gripper_pub = nh.advertise<std_msgs::Float64>("/arm_gripper/command",1,1);
     servo_pub = nh.advertise<uav_arm::jointAngles2>("/servo_msg", 1);
-		joy_sub_ = nh.subscribe<sensor_msgs::Joy>("joy", 10, &Arm::joyCallback, this);
+		joy_sub = nh.subscribe<sensor_msgs::Joy>("joy", 10, &Arm::joyCallback, this);
+		ltrigger_pub = nh.advertise<std_msgs::Float64>("/ltrigger", 1);
+		rtrigger_pub = nh.advertise<std_msgs::Float64>("/rtrigger", 1);
 
     QR_pose.pose.position.x = 0;
     QR_pose.pose.position.y = 0;
@@ -234,7 +250,7 @@ Arm::Arm(){
 		G_pose.pose.position.x = x_goal;
     G_pose.pose.position.y = y_goal;
     G_pose.pose.position.z = z_goal;
-    mode = MANUAL;
+    mode = CARTESIAN;
 }
 
 void Arm::movehome(){
@@ -257,6 +273,7 @@ int Arm::angle2servo(float angle){
 }
 
 void Arm::timer_cb(const ros::TimerEvent& event){
+
 
     int scale = SPEED_SCALE;
     float scale_c = CARTESIAN_SPEED_SCALE;
@@ -379,7 +396,22 @@ void Arm::timer_cb(const ros::TimerEvent& event){
     th3.data = theta3;
     th4.data = theta4;
     th5.data = theta5;
+		ltrigmsg.data = ltrigger;
+		rtrigmsg.data = rtrigger;
 
+
+		if (rtrigger < 0){
+			gripper = -1;
+		}
+		else if (ltrigger < 0){
+			gripper = 1;
+		}
+
+//gripper = rtrigger;
+
+		//gripper = gripper * 4000;
+		grippermsg.data = gripper;
+		rc.gripper = gripper;
 	q01.setRPY(alpha0,0,theta1);
 	q12.setRPY(alpha1,0,theta2);
     q23.setRPY(alpha2,-M_PI/2 - theta3 - 0.146,0);
@@ -432,6 +464,9 @@ void Arm::timer_cb(const ros::TimerEvent& event){
     shoulder_ap_pub.publish(th3);
     elbow_pub.publish(th4);
     wrist_flex_pub.publish(th5);
+		gripper_pub.publish(grippermsg);
+		ltrigger_pub.publish(ltrigmsg);
+		rtrigger_pub.publish(rtrigmsg);
 }
 
 void Arm::QR_cb(const geometry_msgs::PoseStampedConstPtr& p){
@@ -536,6 +571,9 @@ void Arm::joyCallback(const sensor_msgs::Joy::ConstPtr& joy){
 	ds0 = joy -> axes[1];
 	ds1 = joy -> axes[0];
 	ds2 = joy -> axes[4];
+	ltrigger = joy -> axes[2] ;
+	rtrigger = joy -> axes[5] ;
+
 	/*
 	int x = keydown -> code;
 	switch(x){

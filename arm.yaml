@@ -1,18 +1,18 @@
 port: /dev/ttyUSB0
 
-rate: 2500
-read_rate: 2500
-write_rate: 2500
+rate: 250
+read_rate: 150
+write_rate: 150
 
 joints: {
-    shoulder_ml: {id: 1, max_angle: 40, min_angle: -40, ticks: 4096, max_speed: 2500, type: dynamixel},
-    shoulder_ap: {id: 2, max_angle: 80, min_angle: -80, ticks: 4096, max_speed: 250, invert: True},
-    elbow: {id: 3, max_angle: 80, min_angle: -80, ticks: 4096, max_speed: 250},
-    wrist_flex: {id: 4, max_angle: 8, min_angle: -8, ticks: 4096, max_speed: 250, invert: False},
-    wrist_pronate: {id: 5, max_angle: 8, min_angle: -8, ticks: 4096, max_speed: 250},
-    gripper: {id: 0, type: hobby_servo},
+    arm_shoulder_ml: {id: 1, max_angle: 40, min_angle: -40, ticks: 4096, max_speed: 2500, type: dynamixel},
+    arm_shoulder_ap: {id: 2, max_angle: 80, min_angle: -80, ticks: 4096, max_speed: 250, invert: True},
+    arm_elbow: {id: 3, max_angle: 80, min_angle: -80, ticks: 4096, max_speed: 250},
+    arm_wrist_flex: {id: 4, max_angle: 8, min_angle: -8, ticks: 4096, max_speed: 250, invert: False},
+    arm_wrist_pronate: {id: 5, max_angle: 8, min_angle: -8, ticks: 4096, max_speed: 250},
+    arm_gripper: {id: 0, type: hobby_servo, ticks: 2050, min_angle: 1400, max_angle: 25, neutral: 1650, range: 180, max_speed: 45, invert: True},
 }
 
 controllers: {
-  arm_controller: {type: follow_controller, joints: [shoulder_ml, shoulder_ap, elbow, wrist_flex], action_name: arm_controller/follow_joint_trajectory }
+  arm_controller: {type: follow_controller, joints: [arm_shoulder_ml, arm_shoulder_ap, arm_elbow, arm_wrist_flex], action_name: arm_controller/follow_joint_trajectory }
 }
