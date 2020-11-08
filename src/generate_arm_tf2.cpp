@@ -367,6 +367,7 @@ void Arm::timer_cb(const ros::TimerEvent& event){
             rc.servo1 = angle2servo(- M_PI/2 - ths[1] - 0.146);
             rc.servo2 = angle2servo(+ M_PI/2 -ths[2]);
             rc.servo3 = angle2servo(-ths[3]);
+						rc.servo4 = rc.servo4 + scale*ds4;
         }
     }
 
